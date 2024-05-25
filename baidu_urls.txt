@@ -1,0 +1,10 @@
+https://github.com/vimianma/vimianma.github.io/notes/GitLabInstall/
+https://github.com/vimianma/vimianma.github.io/notes/hwodNotes/
+https://github.com/vimianma/vimianma.github.io/notes/dockerNotes/
+https://github.com/vimianma/vimianma.github.io/notes/mysqlInstall/
+https://github.com/vimianma/vimianma.github.io/notes/PdfView/
+https://github.com/vimianma/vimianma.github.io/notes/electronVue/
+https://github.com/vimianma/vimianma.github.io/notes/chunkFile/
+https://github.com/vimianma/vimianma.github.io/bugs/bugsOne/
+https://github.com/vimianma/vimianma.github.io/notes/electronLearn/
+https://github.com/vimianma/vimianma.github.io/notes/GitLearn/

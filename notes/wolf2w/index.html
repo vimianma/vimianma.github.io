@@ -1,0 +1,870 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>wolf2w项目经验_缓存、持久化与参数解析器 | LenlBlog</title><meta name="author" content="Lenl,lenl412@163.com"><meta name="copyright" content="Lenl"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="一个SpringBoot+Vue的项目教程，还包含了MongoDB、ElasticSearch等技术的基本使用。本文为缓存、持久化与参数解析器的应用经验部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wolf2w项目经验_缓存、持久化与参数解析器">
+<meta property="og:url" content="https://github.com/vimianma/vimianma.github.io/notes/wolf2w/index.html">
+<meta property="og:site_name" content="LenlBlog">
+<meta property="og:description" content="一个SpringBoot+Vue的项目教程，还包含了MongoDB、ElasticSearch等技术的基本使用。本文为缓存、持久化与参数解析器的应用经验部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png">
+<meta property="article:published_time" content="2023-04-20T14:40:27.000Z">
+<meta property="article:modified_time" content="2023-05-04T02:06:05.408Z">
+<meta property="article:author" content="Lenl">
+<meta property="article:tag" content="SpringBoot">
+<meta property="article:tag" content="MongoDB">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png"><link rel="shortcut icon" href="/img/lenl.png"><link rel="canonical" href="https://github.com/vimianma/vimianma.github.io/notes/wolf2w/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="baidu-site-verification" content="codeva-6HME93uF43"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?629608ec0c773bd9f96cb72389693ab9";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Lenl","link":"链接: ","source":"来源: LenlBlog","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: true,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'wolf2w项目经验_缓存、持久化与参数解析器',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-05-04 10:06:05'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script></head><body><!--include ./fullpage-loading.pug--><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="wizard-scene"><div class="wizard-objects"><div class="wizard-square"></div><div class="wizard-circle"></div><div class="wizard-triangle"></div></div><div class="wizard"><div class="wizard-body"></div><div class="wizard-right-arm"><div class="wizard-right-hand"></div></div><div class="wizard-left-arm"><div class="wizard-left-hand"></div></div><div class="wizard-head"><div class="wizard-beard"></div><div class="wizard-face"><div class="wizard-adds"></div></div><div class="wizard-hat"><div class="wizard-hat-of-the-hat"></div><div class="wizard-four-point-star --first"></div><div class="wizard-four-point-star --second"></div><div class="wizard-four-point-star --third"></div></div></div></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = 'hidden';
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+
+preloader.initLoading()
+window.addEventListener('load',()=> { preloader.endLoading() })
+//避免加载时间过长
+setTimeout(function(){preloader.endLoading();}, 3000);
+
+if (false) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "/img/hexo_loading.gif" data-lazy-src="/img/lenl.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 存档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 分享</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/collect/"><i class="fa-fw fas fa-book"></i><span> 大佬们の干货</span></a></li><li><a class="site-page child" href="/resources/"><i class="fa-fw fab fa-dropbox"></i><span> 屯屯鼠の资源</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png')"><nav id="nav"><span id="blog-info"><a href="/" title="LenlBlog"><img class="site-icon" src= "/img/hexo_loading.gif" data-lazy-src="/img/lenl.png"/><span class="site-name">LenlBlog</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 存档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 分享</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/collect/"><i class="fa-fw fas fa-book"></i><span> 大佬们の干货</span></a></li><li><a class="site-page child" href="/resources/"><i class="fa-fw fab fa-dropbox"></i><span> 屯屯鼠の资源</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">wolf2w项目经验_缓存、持久化与参数解析器</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-04-20T14:40:27.000Z" title="发表于 2023-04-20 22:40:27">2023-04-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-05-04T02:06:05.408Z" title="更新于 2023-05-04 10:06:05">2023-05-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%BC%96%E7%A8%8B%E9%9A%8F%E8%AE%B0/">编程随记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">5.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>18分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="wolf2w项目经验_缓存、持久化与参数解析器"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/notes/wolf2w/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/notes/wolf2w/" itemprop="commentCount"><i class="fa-solid fa-spinner fa-spin"></i></span></a></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1>wolf2w项目学习随记_1</h1>
+<div class="note warning simple"><p>本随记为跟随B站视频<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1re4y1e7rJ" title="旅游出行项目学习">2022版 Spring Boot+Vue前后端分离项目实战</a> 学习时随手记下的一些经验整理。以便在后续学习开发中遇到类似问题能够找到解答依据。</p>
+</div>
+<h2 id="SQL排序列运算性能问题">SQL排序列运算性能问题</h2>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>分析：大表order by 排序字段涉及运算时性能极低。</p>
+</li>
+<li class="lvl-2">
+<p>原因：<mark class="hl-label red">数据量大</mark>    <mark class="hl-label red">排序列有运算</mark> </p>
+</li>
+<li class="lvl-2">
+<p>解决方案：使用分时统计表。</p>
+</li>
+</ul>
+<h3 id="分时统计表操作思路：大表转小表">分时统计表操作思路：大表转小表</h3>
+<ol>
+<li class="lvl-3">
+<p>先按照需求创建出一张临时表；</p>
+</li>
+<li class="lvl-3">
+<p>第一次查询大表得到10条数据，然后将数据缓存到临时表中</p>
+</li>
+<li class="lvl-3">
+<p>下一次查询直接查询临时表即可。</p>
+</li>
+<li class="lvl-3">
+<p>临时表的数据跟大表数据存在一定延时，需要定时维护更新数据。(牺牲实时性换取性能)</p>
+</li>
+</ol>
+<p><strong>思考：</strong> 分时统计表应该如何设计</p>
+<p><strong>分析：</strong> 必须拥有原始sql查询出来的结果列；两列计算可结合成自定义列；需要加上时间和类别区分。</p>
+<blockquote>
+<p>分时更新，取用的时候要指定最新时间，如下。</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> xxx</span><br><span class="line">	<span class="keyword">where</span> type<span class="operator">=</span>a <span class="keyword">and</span> xx_time<span class="operator">=</span>(<span class="keyword">select</span> <span class="built_in">max</span>(xx_time) <span class="keyword">from</span> xxx <span class="keyword">where</span> type<span class="operator">=</span>a)</span><br><span class="line">	<span class="keyword">order</span> <span class="keyword">by</span> xx_num <span class="keyword">desc</span></span><br><span class="line">	limit <span class="number">10</span></span><br></pre></td></tr></table></figure>
+<h3 id="如何定期-定时维护分时统计表">如何定期/定时维护分时统计表</h3>
+<p><strong>分析：</strong> 实现分时统计表操作特点：</p>
+<ol>
+<li class="lvl-3">
+<p>周期执行；</p>
+</li>
+<li class="lvl-3">
+<p>尽量减少人工参与；</p>
+</li>
+</ol>
+<blockquote>
+<p>上面的特点很明显需要使用定时任务：</p>
+<ul class="lvl-1">
+<li class="lvl-2">方案1：数据库定时任务存储过程；</li>
+<li class="lvl-2">方案2：操作系统的定时任务 + sql脚本</li>
+<li class="lvl-2">方案3：Java代码层面–定时器 *</li>
+</ul>
+</blockquote>
+<p>Java定时器的常用实现技术有多种：</p>
+<ol>
+<li class="lvl-3">
+<p>jdk自带timer</p>
+</li>
+<li class="lvl-3">
+<p>Spring Task</p>
+</li>
+<li class="lvl-3">
+<p>第三方组件-quartz</p>
+</li>
+<li class="lvl-3">
+<p>elastic-job / xxl-job</p>
+</li>
+</ol>
+<p>教程中使用了 <mark class="hl-label blue">SpringTask</mark>  。</p>
+<div class="note warning simple"><p>为了方便可能的集群部署跟微服务拆分拓展时的实现，对于定时任务建议单独创建一个新的模块——任务调度模块，统一处理项目中的定时任务。</p>
+</div>
+<h4 id="第一步-新建Job">第一步 新建Job</h4>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">StrategyRankDataHandlerJob</span> &#123;</span><br><span class="line">    <span class="meta">@Scheduled(cron=&quot;&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doWork</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;--------&quot;</span>+System.currentTimeMillis());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中 <code>cron</code> 表达式可参照：<a target="_blank" rel="noopener" href="https://cron.qqe2.com/">在线Cron表达式生成器</a></p>
+<div class="note warning simple"><p>cron表达式有2种形式，含年(7位)和不含年(6位)，Spring支持不含年的形式。</p>
+</div>
+<h4 id="第二步-给启动类加上-EnableScheduling注解">第二步 给启动类加上@EnableScheduling注解</h4>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableScheduling</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MgrSite</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        SpringApplication.run(MgrSite.class,args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，启动后便会按照cron执行逻辑。</p>
+<div class="note warning simple"><p>教程中直接进行每5秒一次的插入Mysql，个人觉得还需要执行一个清理逻辑，不然数据会越来越多，存在大量冗余。</p>
+<p>另外，既然使用了redis，那么这些数据选择进redis缓存，定时刷新，是一个不错的选择呢。</p>
+</div>
+<h3 id="关于对大表进行GroupBy统计">关于对大表进行GroupBy统计</h3>
+<div class="note warning simple"><p>对大表数据进行GroupBy操作非常消耗性能，一般能不用就不用。</p>
+<p>必须使用时，仍可以采用分时统计表策略。</p>
+</div>
+<ol>
+<li class="lvl-3">
+<p>建一张临时表（分时统计表）</p>
+</li>
+<li class="lvl-3">
+<p>先执行group by语句查询大表，得到满足需求数据</p>
+</li>
+<li class="lvl-3">
+<p>将数据缓存临时表中</p>
+</li>
+<li class="lvl-3">
+<p>下次查询直接查询临时表即可</p>
+</li>
+<li class="lvl-3">
+<p>定期维护临时表（分时统计表）</p>
+</li>
+</ol>
+<p>同一模块多section数据结构相同但字段名不同时，可以通过自定义列名方式，设计在同一张表中，但需要一个type字段进行区分。同时，同样需要加一个分时统计表用于保存统计的时间。</p>
+<h2 id="项目集成MongoDB">项目集成MongoDB</h2>
+<div class="note info simple"><p>wolf2w项目中是需要评论系统，因此将文章评论存在mongoDB中。</p>
+<p>可学习借鉴，当下次有类似需求时可以借鉴。</p>
+</div>
+<h3 id="集成与数据添加">集成与数据添加</h3>
+<ol>
+<li class="lvl-3">
+<p>首先，在公共模块中引入依赖：</p>
+</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-data-mongodb<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li class="lvl-3">
+<p>然后在application.yml中建好配置：</p>
+</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="comment">#mongodb</span></span><br><span class="line">  <span class="attr">data:</span></span><br><span class="line">    <span class="attr">mongodb:</span></span><br><span class="line">      <span class="attr">uri:</span> <span class="string">mongodb://127.0.0.1:27017/wolf2w</span></span><br><span class="line">      </span><br><span class="line"><span class="attr">logging:</span></span><br><span class="line">  <span class="attr">level:</span></span><br><span class="line">    <span class="attr">org:</span></span><br><span class="line">      <span class="attr">springframework:</span></span><br><span class="line">        <span class="attr">data:</span></span><br><span class="line">          <span class="attr">mongodb:</span></span><br><span class="line">            <span class="attr">core:</span> <span class="string">DEBUG</span></span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li class="lvl-3">
+<p>新建mongo包，下放对应的包：</p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mongo(mongoDB对应的包)</span><br><span class="line">|--domain(需要存入mongoDB的数据对象)</span><br><span class="line">|--query(需要进行查询的参数对象)</span><br><span class="line">|--repository(持久化仓储对象)</span><br><span class="line">|--service(数据库处理工具定义)</span><br><span class="line">|--|--impl(数据库处理工具实现类)</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li class="lvl-3">
+<p>在repository中建立对应的持久化仓储工具（下面以项目中的攻略评论为例）</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> cn.wolfcode.wolf2w.mongo.repository;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cn.wolfcode.wolf2w.mongo.domain.StrategyComment;</span><br><span class="line"><span class="keyword">import</span> org.springframework.data.mongodb.repository.MongoRepository;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> Lenl</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> v1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@create</span> 2023-04-26 18:22</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span>  MongoRepository第二个参数为主键类型，一般用String</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">StrategyCommentRepository</span> <span class="keyword">extends</span> <span class="title class_">MongoRepository</span>&lt;StrategyComment,String&gt; &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="note info simple"><p>值得一提的是，不同于mybatis-plus，mongo在仓储继承了 <code>MongoRepository</code> 后Spring容器会自动进行扫描，而不用像m-p那样需要@Mapper</p>
+</div>
+<ol start="5">
+<li class="lvl-3">
+<p>在service中建立对应的数据库处理工具定义，并在impl下实现它：</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//service定义</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">IStrategyCommentService</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">save</span><span class="params">(StrategyComment strategyComment)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//impl实现</span></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">StrategyCommentServiceImpl</span> <span class="keyword">implements</span> <span class="title class_">IStrategyCommentService</span> &#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> StrategyCommentRepository repository;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">save</span><span class="params">(StrategyComment comment)</span> &#123;</span><br><span class="line">        <span class="comment">/* </span></span><br><span class="line"><span class="comment">        1.避免空串导致的id不回显</span></span><br><span class="line"><span class="comment">        2.避免前面处理中Bean属性拷贝造成这里的id有值</span></span><br><span class="line"><span class="comment">        总之，设一个null是有好处的。</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">        comment.setId(<span class="literal">null</span>);</span><br><span class="line">        <span class="comment">//指定创建时间</span></span><br><span class="line">        comment.setCreateTime(<span class="keyword">new</span> <span class="title class_">Date</span>());</span><br><span class="line">        <span class="comment">//存储</span></span><br><span class="line">        repository.save(comment);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ol start="6">
+<li class="lvl-3">
+<p>controller层调用，完成评论的存储</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> IStrategyCommentService strategyCommentService;</span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> IUserinfoRedisService userinfoRedisService;</span><br><span class="line"></span><br><span class="line"><span class="meta">@PostMapping(&quot;/commentAdd&quot;)</span></span><br><span class="line"><span class="keyword">public</span> JsonResult <span class="title function_">commentAdd</span><span class="params">(StrategyComment comment, HttpServletRequest request)</span>&#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">token</span> <span class="operator">=</span> request.getHeader(<span class="string">&quot;token&quot;</span>);</span><br><span class="line">    <span class="comment">//从redis获取用户信息，并存入comment，以保证数据查询时的方便</span></span><br><span class="line">    <span class="type">UserInfo</span> <span class="variable">user</span> <span class="operator">=</span> userinfoRedisService.getUserByToken(token);</span><br><span class="line">    <span class="comment">//bean属性拷贝，将user与comment中的相同属性拷贝至comment中</span></span><br><span class="line">    <span class="comment">//底层实现原理：反射</span></span><br><span class="line">    BeanUtils.copyProperties(user,comment);</span><br><span class="line">    strategyCommentService.save(comment);</span><br><span class="line">    <span class="keyword">return</span> JsonResult.success();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="note warning simple"><p>由于spring-data的处理，在存储数据时会识别类所有的属性，而java类的总父类Object含getClass()方法，所以一般来说，存储后mongoDB对应文档中会多出 <code>_class</code> 字段。</p>
+<p>以下记录以下去掉 <code>_class</code> 的方法。</p>
+</div>
+<ol start="7">
+<li class="lvl-3">
+<p>去掉存储时的 <code>_class</code> 属性</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//采用配置类方式</span></span><br><span class="line"><span class="comment">//在WebConfig下添加如下Bean</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">WebConfig</span> <span class="keyword">implements</span>  <span class="title class_">WebMvcConfigurer</span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> MappingMongoConverter <span class="title function_">mappingMongoConverter</span><span class="params">(MongoDatabaseFactory factory, MongoMappingContext context, BeanFactory beanFactory)</span>&#123;</span><br><span class="line">        DbRefResolver dbRefResolver=<span class="keyword">new</span> <span class="title class_">DefaultDbRefResolver</span>(factory);</span><br><span class="line">        MappingMongoConverter mappingMongoConverter=<span class="keyword">new</span> <span class="title class_">MappingMongoConverter</span>(dbRefResolver,context);</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            		mappingMongoConverter.setCustomConversions(beanFactory.getBean(CustomConversions.class));</span><br><span class="line">        &#125;<span class="keyword">catch</span> (NoSuchBeanDefinitionException ignore)&#123;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 去除_class属性</span></span><br><span class="line">        mappingMongoConverter.setTypeMapper(<span class="keyword">new</span> <span class="title class_">DefaultMongoTypeMapper</span>(<span class="literal">null</span>));</span><br><span class="line">        <span class="keyword">return</span> mappingMongoConverter;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="note warning simple"><p>关于mongoDB中存储的时间：</p>
+<p>时间数据存储后用navicate展示时，会发现其时间为伦敦时间，与国内本地时间相差8小时；</p>
+<p>但我们不必自己进行处理，框架会自动进行处理的！</p>
+</div>
+<h3 id="数据查询分页">数据查询分页</h3>
+<div class="note info simple"><p>mongoDB的分页思想类似mybatis-plus，但没有像那样现成的封装类，方法需要自己做封装。</p>
+<p>感觉要使用还是要先多熟悉熟悉mongoDB的相关api。</p>
+</div>
+<ol>
+<li class="lvl-3">
+<p>在Controller中调用时，返回的Page类是spring框架的封装类</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> IStrategyCommentService strategyCommentService;</span><br><span class="line"></span><br><span class="line"><span class="meta">@GetMapping(&quot;/commentsPage&quot;)</span></span><br><span class="line"><span class="keyword">public</span> JsonResult <span class="title function_">comments</span><span class="params">(StrategyCommentQuery qo)</span>&#123;</span><br><span class="line">    <span class="comment">//注意这里的Page是spring框架的page</span></span><br><span class="line">    <span class="comment">//org.springframework.data.domain.Page;</span></span><br><span class="line">    Page page= strategyCommentService.queryPage(qo);</span><br><span class="line">    <span class="keyword">return</span> JsonResult.success(page);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li class="lvl-3">
+<p>在Impl中实现queryPage方法</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> StrategyCommentRepository repository;</span><br><span class="line"><span class="comment">// 引入MongoDB的Template，需要使用它的方法进行分页</span></span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> MongoTemplate template;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> Page <span class="title function_">queryPage</span><span class="params">(StrategyCommentQuery qo)</span> &#123;</span><br><span class="line">    <span class="comment">//在MongoDB中没有现成的分页方法，需要自己去封装</span></span><br><span class="line">    <span class="comment">//totalCount 查询需要分页的总数据量</span></span><br><span class="line">    Query query=<span class="keyword">new</span> <span class="title class_">Query</span>();</span><br><span class="line">    <span class="keyword">if</span>(qo.getStrategyId()!=<span class="literal">null</span>)&#123;</span><br><span class="line">        <span class="comment">//MongoDB的分类筛选方法 addCriteria Criteria.where...</span></span><br><span class="line">        query.addCriteria(Criteria.where(<span class="string">&quot;strategyId&quot;</span>).is(qo.getStrategyId()));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//查询出总数 template.count</span></span><br><span class="line">    <span class="type">long</span> <span class="variable">totalCount</span> <span class="operator">=</span> template.count(query, StrategyComment.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(totalCount==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="comment">//总数为0时 返回空页</span></span><br><span class="line">        <span class="keyword">return</span> Page.empty();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//进行分页</span></span><br><span class="line">    <span class="comment">//方案一 拼接条件</span></span><br><span class="line">    <span class="comment">//query.skip((qo.getCurrentPage()-1)*qo.getPageSize()).limit(qo.getPageSize());</span></span><br><span class="line">    <span class="comment">//方案二 用封装对象</span></span><br><span class="line">    <span class="comment">//参数1：当前页，从0算起； 参数2：每页显示记录数</span></span><br><span class="line">    Pageable page= PageRequest.of(qo.getCurrentPage()-<span class="number">1</span>,qo.getPageSize());</span><br><span class="line">    <span class="comment">//带上分页条件</span></span><br><span class="line">    query.with(page);</span><br><span class="line">    <span class="comment">//查询得到分页结果</span></span><br><span class="line">    List&lt;StrategyComment&gt; data = template.find(query, StrategyComment.class);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">PageImpl</span>&lt;StrategyComment&gt;(data,page,totalCount);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="条件查询的自定义实现">条件查询的自定义实现</h3>
+<h4 id="引入">引入</h4>
+<div class="note info simple"><p>spring-data中，mongoDB的一些条件查询只需要在对应的Repository中按要求的语法声明方法即可，无需进行实现。</p>
+</div>
+<p>如，需要根据游记id查询所有的游记评论，那么在 <code>TravelCommentRepository</code> 中声明一个findByTravelId方法，并传入 <code>travelId</code> 即可。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">TravelCommentRepository</span> <span class="keyword">extends</span> <span class="title class_">MongoRepository</span>&lt;TravelComment,String&gt; &#123;</span><br><span class="line">    List&lt;TravelComment&gt; <span class="title function_">findByTravelId</span><span class="params">(Long travelId)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="拓展">拓展</h4>
+<p>不仅是findById，在mongorepository中，还有对于其他一些查询的自定义方法：</p>
+<table>
+<thead>
+<tr>
+<th>方法关键字</th>
+<th>示例</th>
+<th>等价于SQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>And</td>
+<td>findByLastnameAndFirstname</td>
+<td>… where x.lastname = ?1 and x.firstname = ?2</td>
+</tr>
+<tr>
+<td>Or</td>
+<td>findByLastnameOrFirstname</td>
+<td>… where x.lastname = ?1 or x.firstname = ?2</td>
+</tr>
+<tr>
+<td>Is,Equals</td>
+<td>findByFirstname，findByFirstnameIs，findByFirstnameEquals</td>
+<td>… where x.firstname = ?1</td>
+</tr>
+<tr>
+<td>Between</td>
+<td>findByStartDateBetween</td>
+<td>… where x.startDate between ?1 and ?2</td>
+</tr>
+<tr>
+<td>LessThan</td>
+<td>findByAgeLessThan</td>
+<td>… where x.age &lt; ?1</td>
+</tr>
+<tr>
+<td>LessThanEqual</td>
+<td>findByAgeLessThanEqual</td>
+<td>… where x.age &lt;= ?1</td>
+</tr>
+<tr>
+<td>GreaterThan</td>
+<td>findByAgeGreaterThan</td>
+<td>… where x.age &gt; ?1</td>
+</tr>
+<tr>
+<td>GreaterThanEqual</td>
+<td>findByAgeGreaterThanEqual</td>
+<td>… where x.age &gt;= ?1</td>
+</tr>
+<tr>
+<td>After</td>
+<td>findByStartDateAfter</td>
+<td>… where x.startDate &gt; ?1</td>
+</tr>
+<tr>
+<td>Before</td>
+<td>findByStartDateBefore</td>
+<td>… where x.startDate &lt; ?1</td>
+</tr>
+<tr>
+<td>IsNull</td>
+<td>findByAgeIsNull</td>
+<td>… where x.age is null</td>
+</tr>
+<tr>
+<td>IsNotNull,NotNull</td>
+<td>findByAge[Is]NotNull</td>
+<td>… where x.age not null</td>
+</tr>
+<tr>
+<td>Like</td>
+<td>findByFirstnameLike</td>
+<td>… where x.firstname like ?1</td>
+</tr>
+<tr>
+<td>NotLike</td>
+<td>findByFirstnameNotLike</td>
+<td>… where x.firstname not like ?1</td>
+</tr>
+<tr>
+<td>StartingWith</td>
+<td>findByFirstnameStartingWith</td>
+<td>… where x.firstname like ?1**（参数绑定附加 <code>%</code> ）**</td>
+</tr>
+<tr>
+<td>EndingWith</td>
+<td>findByFirstnameEndingWith</td>
+<td>… where x.firstname like ?1**（参数绑定附加 <code>%</code> ）**</td>
+</tr>
+<tr>
+<td>Containing</td>
+<td>findByFirstnameContaining</td>
+<td>… where x.firstname like ?1**（参数绑定 <code>%</code> ）**</td>
+</tr>
+<tr>
+<td>OrderBy</td>
+<td>findByAgeOrderByLastnameDesc</td>
+<td>… where x.age = ?1 order by x.lastname desc</td>
+</tr>
+<tr>
+<td>Not</td>
+<td>findByLastnameNot</td>
+<td>… where x.lastname &lt;&gt; ?1</td>
+</tr>
+<tr>
+<td>In</td>
+<td>findByAgeIn(Collection ages)</td>
+<td>… where x.age in ?1</td>
+</tr>
+<tr>
+<td>NotIn</td>
+<td>findByAgeNotIn(Collection ages)</td>
+<td>… where x.age not in ?1</td>
+</tr>
+<tr>
+<td>True</td>
+<td>findByActiveTrue()</td>
+<td>… where x.active = true</td>
+</tr>
+<tr>
+<td>False</td>
+<td>findByActiveFalse()</td>
+<td>… where x.active = false</td>
+</tr>
+<tr>
+<td>IgnoreCase</td>
+<td>findByFirstnameIgnoreCase</td>
+<td>… where UPPER(x.firstame) = UPPER(?1)</td>
+</tr>
+</tbody>
+</table>
+<div class="note info simple"><p>总体观之，就是常用的一些命名方式，需要常用以记录，在此留下记录，以便需要用时查找。</p>
+<p>此外，mongoDB还能够进行一些聚合查询操作，有用到的案例时再进行记录。</p>
+</div>
+<h2 id="SpringMVC-参数解析器">SpringMVC 参数解析器</h2>
+<h3 id="自定义参数解析器">自定义参数解析器</h3>
+<p>一般接口获取用户信息可以在接口传入 <code>HttpServletRequest</code> 参数，并从中获取 <code>token</code> 再解析或从redis中获取用户，但大量接口都需要该操作，形成了大量重复。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;/info&quot;)</span></span><br><span class="line"><span class="keyword">public</span> JsonResult <span class="title function_">info</span><span class="params">(HttpServletRequest request)</span>&#123;</span><br><span class="line">    String token=request.getHeader(<span class="string">&quot;token&quot;</span>);</span><br><span class="line">    <span class="type">UserInfo</span> <span class="variable">user</span> <span class="operator">=</span> userInfoRedisService.getUserByToken(token);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时需要进行优化：自定义参数解析器</p>
+<div class="note info simple"><p>当我们在方法接口中声明参数，前端传过来的参数能与其对应，就是因为Spring的 <code>默认参数解析器</code> 所做的工作；</p>
+<p>而解析不存在的参数则需要 <code>自定义参数解析器</code> 。</p>
+</div>
+<p><strong>因此现在要做的就是把前端传的Header中的token映射成当前登录的User信息，并注入到接口的指定类型参数中。</strong></p>
+<ol>
+<li class="lvl-3">
+<p>首先建一个resolver包，新建 <code>UserInfoArgumentResolver</code> 类如下：</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> Lenl</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> v1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@create</span> 2023-04-30 9:33</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span> 将请求映射方法中UserInfo类型的参数解析成当前登录对象中 </span></span><br><span class="line"><span class="comment"> * 通过实现HandlerMethodArgumentResolver的两个方法进行解析注入：</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserInfoArgumentResolver</span> <span class="keyword">implements</span> <span class="title class_">HandlerMethodArgumentResolver</span> &#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> IUserinfoRedisService userinfoRedisService;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//标识当前解析器支持解析的类型 -&gt; 此处当前解析器只支持解析UserInfo类型</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">supportsParameter</span><span class="params">(MethodParameter parameter)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> parameter.getParameterType().equals(UserInfo.class);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//解析参数</span></span><br><span class="line">    <span class="comment">//该方法执行的前提 supportsParameter 返回 true</span></span><br><span class="line">    <span class="comment">//此处表示将请求头 token 解析成当前登录的用户对象</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Object <span class="title function_">resolveArgument</span><span class="params">(MethodParameter parameter,</span></span><br><span class="line"><span class="params">                                  ModelAndViewContainer mavContainer,</span></span><br><span class="line"><span class="params">                                  NativeWebRequest webRequest,</span></span><br><span class="line"><span class="params">                                  WebDataBinderFactory binderFactory)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">//方法1 直接获取请求头参数</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">token</span> <span class="operator">=</span> webRequest.getHeader(<span class="string">&quot;token&quot;</span>);</span><br><span class="line">        <span class="comment">//方法2 先获取原生对象，然后使用原生对象获取请求头</span></span><br><span class="line">        <span class="comment">//HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);</span></span><br><span class="line">        <span class="comment">//String token = request.getHeader(&quot;token&quot;);</span></span><br><span class="line">        <span class="keyword">return</span> userinfoRedisService.getUserByToken(token);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li class="lvl-3">
+<p>在自定义的WebConfig中进行解析器的配置：</p>
+</li>
+</ol>
+<p>通过@Bean生成参数解析器：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="keyword">public</span> UserInfoArgumentResolver <span class="title function_">userInfoArgumentResolver</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">UserInfoArgumentResolver</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后通过重写 <code>WebMvcConfigurer</code> 的 <code>addArgumentResolvers</code> 方法将自定义参数解析器放进容器中：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addArgumentResolvers</span><span class="params">(List&lt;HandlerMethodArgumentResolver&gt; resolvers)</span> &#123;</span><br><span class="line">    resolvers.add(userInfoArgumentResolver());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li class="lvl-3">
+<p>以上步骤完成后，之前的获取用户信息的接口就可以直接声明参数自动注入了：</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//此处UserInfo非前端所传参数</span></span><br><span class="line"><span class="meta">@GetMapping(&quot;/info&quot;)</span></span><br><span class="line"><span class="keyword">public</span> JsonResult <span class="title function_">info</span><span class="params">(UserInfo user)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> JsonResult.success(user);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="参数解析器实现流程">参数解析器实现流程</h3>
+<ol>
+<li class="lvl-3">
+<p>请求进入请求映射方法之后，会解析方法中所有参数得到参数列表：paramList</p>
+</li>
+<li class="lvl-3">
+<p>遍历paramList列表，在循环中遍历所有参数解析器（包括自定义参数解析），然后逐一调用参数解析器中的supportsParameter方法，一旦该方法返回true，表示当前解析器能解析当前参数，然后马上执行当前解析器的resolveArgument方法，将结果返回并注入到请求映射参数形参中，同时马上结束当前循环，进入外层的下一轮循环。</p>
+</li>
+</ol>
+<p>伪代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(MethodParameter parameter:paramList)&#123;</span><br><span class="line">    <span class="keyword">for</span>(HanlerMethodArgmentResolver hmar:resolvers)&#123;</span><br><span class="line">        <span class="keyword">if</span>(hmar.supportParameter(parameter))&#123;</span><br><span class="line">            Object ret= hmar.resolverArgment(parameter,...);</span><br><span class="line">            <span class="comment">//注入逻辑...</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="注解区分默认与自定义解析器">注解区分默认与自定义解析器</h3>
+<p>如果自定义参数解析器类型与默认解析器需要解析的类型相同，如上述情况下修改用户信息的接口前端传来UserInfo参数也会被自定义解析器注入，从而产生冲突。</p>
+<p>因此需要自定义一个参数注解，标注了对应注解的参数才使用自定义参数解析器进行解析。</p>
+<ol>
+<li class="lvl-3">
+<p>自定义注解@UserParam:</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> Lenl</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> v1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@create</span> 2023-04-30 10:12</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span> 指定的注解的参数使用自定义的参数解析器</span></span><br><span class="line"><span class="comment"> *  此处将UserInfo类型的参数解析未当前登录对象（使用自定义注解）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Target(ElementType.PARAMETER)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> UserParam &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li class="lvl-3">
+<p>在自定义参数解析器的 <code>supportsParameter</code> 方法假如注解的判断：</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">supportsParameter</span><span class="params">(MethodParameter parameter)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">        parameter.getParameterType().equals(UserInfo.class)</span><br><span class="line">        &amp;&amp;</span><br><span class="line">        parameter.hasParameterAnnotation(UserParam.class);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li class="lvl-3">
+<p>在需要进行自定义参数解析器解析的参数前加上自定义注解即可：</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;/info&quot;)</span></span><br><span class="line"><span class="keyword">public</span> JsonResult <span class="title function_">info</span><span class="params">(<span class="meta">@UserParam</span> UserInfo user)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> JsonResult.success(user);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时，未加该注解的对应类型参数将会被默认解析器自动解析。</p>
+<h2 id="数据统计相关">数据统计相关</h2>
+<p>此处此项目目前的统计指的是文章阅读量、点赞数、评论数、收藏数等这些数据的统计。</p>
+<h3 id="阅读量-评论数类型">阅读量/评论数类型</h3>
+<p>以攻略的 <code>阅读数量</code> 统计为例，分析其实现：</p>
+<p><strong>实现</strong>：页面访问获取攻略信息接口，执行update sql 修改攻略表的viewNum列，实现+1逻辑。</p>
+<p><strong>分析</strong>：可以实现阅读量添加操作，但如果访问量很大，过于频繁执行sql会导致mysql宕机。</p>
+<p><strong>思考</strong>：那么该如何解决？</p>
+<p><strong>解决方案</strong>：</p>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>&gt; 垂直拓展（升级服务器性能：加钱）</p>
+</li>
+<li class="lvl-2">
+<p>&gt; 使用mysql集群（主从分离，读写分离等）</p>
+</li>
+<li class="lvl-2">
+<p>&gt; 使用消息中间件（削峰填谷）</p>
+</li>
+<li class="lvl-2">
+<p>&gt; 使用缓存（最廉价的方式）</p>
+</li>
+</ul>
+<p>缓存一个计数器，达到一定条件后再一次性加入mysql执行。</p>
+<p><strong>适合的缓存技术</strong>：</p>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>jdk中的Map（不建议使用，没有持久化功能）</p>
+</li>
+<li class="lvl-2">
+<p>第三方组件：Ehcache（单体项目[同一jvm]中可以使用，集群/分布式微服务项目不建议使用）</p>
+</li>
+<li class="lvl-2">
+<p>第三方组件：Redis\memcached（强烈建议使用：redis适用各种场景，同时性能较高）</p>
+</li>
+<li class="lvl-2">
+<p>非关系型数据库：mongoDB（但其定位在应用数据库，不建议做缓存-半内存级别）</p>
+</li>
+</ul>
+<p>因此，选择Redis实现最佳。</p>
+<p><strong>通用k-v设计</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>strategy_viewnum:sid</td>
+<td>阅读数</td>
+</tr>
+<tr>
+<td>strategy_replynum:sid</td>
+<td>回复数</td>
+</tr>
+<tr>
+<td>strategy_favornum:sid</td>
+<td>收藏数</td>
+</tr>
+<tr>
+<td>strategy_sharenum:sid</td>
+<td>分享数</td>
+</tr>
+<tr>
+<td>strategy_thumbnum:sid</td>
+<td>点赞数</td>
+</tr>
+</tbody>
+</table>
+<p><strong>存在瑕疵</strong>：首先key有点多；其次维护不方便</p>
+<p><strong>改进方案</strong>：</p>
+<ol>
+<li class="lvl-3">
+<p>适用hash方式</p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>strategy_hash:sid</td>
+<td>{ <br>     viewnum:阅读数<br><br>     replynum:回复数<br/><br/>     favornum:收藏数<br/><br/>     sharenum:分享数<br/><br/>     thumbnum:点赞数<br/>}</td>
+</tr>
+</tbody>
+</table>
+<p>如果阅读数+1 ：hincrby strategy_hash:sid viewnum</p>
+<ol start="2">
+<li class="lvl-3">
+<p>适用vo的方式</p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>strategy_vo:sid</td>
+<td>vo对象</td>
+</tr>
+</tbody>
+</table>
+<p>如果阅读数+1：获取vo对象-修改vo对象的viewnum属性值-更新redis中的vo对象。</p>
+<div class="note warning simple"><p>如果想要数据不丢失[线程安全，数据不被覆盖]，适用hash方式，反之适用vo方式；</p>
+<p>如果想代码操作方便，适用vo方式，反之适用hash方式；</p>
+<p>综合：数据安全选hash，操作方便选vo。</p>
+</div>
+<p>因为项目不关注具体小个数，因此使用vo方式。但实际业务用hash方式更好。</p>
+<h3 id="点赞数-收藏数类型">点赞数/收藏数类型</h3>
+<p>点赞与收藏需要判断请求是[点赞/收藏]操作还是[取消]操作</p>
+<p>因为http的无状态性，对每个请求同等对待且每个请求独立，所以需要设计某种逻辑让后端服务器能够识别不同请求或者不同请求存在关系。如 <code>用户登录</code> 功能。</p>
+<p>解决：</p>
+<p>在服务端缓存用户身份识别码（list/set）。每次请求带上用户信息。</p>
+<p>考虑此处缓存的工具为redis。key-value设计方案：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>key</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>方案1</td>
+<td>strategy_favor:sid</td>
+<td>[uid1,uid2…]</td>
+</tr>
+<tr>
+<td>方案2</td>
+<td>strategy_favor:uid</td>
+<td>[sid1,sid2…]</td>
+</tr>
+</tbody>
+</table>
+<p>方案2从用户角度出发，此处更适合。</p>
+<p>方案1从对象角度出发，适合朋友圈点赞。</p>
+<p>具体实现流程：</p>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>用户点击收藏按钮，未登录则提示。</p>
+</li>
+<li class="lvl-2">
+<p>如果已登录，带上被收藏的sid以及请求token。</p>
+</li>
+<li class="lvl-2">
+<p>接口接收请求，获取sid以及用户uid。</p>
+</li>
+<li class="lvl-2">
+<p>使用uid拼接key，获取redis中的sid的set集合</p>
+</li>
+<li class="lvl-2">
+<p>判断sid是否在其中</p>
+<ul class="lvl-2">
+<li class="lvl-4">如果不在，当前请求为收藏请求，获取vo对象，收藏数+1，sid入set；</li>
+<li class="lvl-4">如果在，当前请求为取消收藏，获取vo对象，收藏数-1，sid移除sidSet;</li>
+</ul>
+</li>
+<li class="lvl-2">
+<p>更新redis中的vo对象，sid的set集合。</p>
+</li>
+</ul>
+<blockquote>
+<p>redis的set直接使用template.opsForSet().add()可以直接添加。</p>
+</blockquote>
+<h3 id="缓存操作的完整流程">缓存操作的完整流程</h3>
+<ol>
+<li class="lvl-3">
+<p>缓存数据预热（初始化）；</p>
+</li>
+<li class="lvl-3">
+<p>缓存数据业务实现；</p>
+</li>
+<li class="lvl-3">
+<p>缓存数据落地（持久化）。</p>
+</li>
+</ol>
+<h4 id="缓存初始化">缓存初始化</h4>
+<p>数据从数据库 初始化/预热/同步 到缓存中。</p>
+<ol>
+<li class="lvl-3">
+<p>需要将什么数据初始化到缓存数据库中：</p>
+</li>
+</ol>
+<ul class="lvl-0">
+<li class="lvl-2">
+<p>频繁改动（DML）的数据，需要缓存到redis数据库中；</p>
+</li>
+<li class="lvl-2">
+<p>不频繁改动（DQL）数据，需要缓存到redis数据库中。</p>
+</li>
+</ul>
+<ol start="2">
+<li class="lvl-3">
+<p>在什么模块中 初始化 逻辑：考虑到集群扩展，api可能会有多个，因此推荐初始化在后台后端中。</p>
+</li>
+<li class="lvl-3">
+<p>在那种组件中实现 初始化 逻辑（filter\servlet\interceptor\controller listener\定时器）</p>
+</li>
+</ol>
+<p>初始化操作特点：尽可能早地初始化；尽可能少的操作。</p>
+<p>filter/interceptor：定位在拦截请求，不建议使用；</p>
+<p>servlet/controller：定位在接受请求，处理请求；响应请求，也可行（一般用于业务初始化）；</p>
+<p>listener：定位在监听事件并执行预设逻辑，可行。java web 的web容器监听器可行(tomcat 启动后马上执行)。</p>
+<p><strong>关于监听器有2个方案：</strong></p>
+<ol>
+<li class="lvl-3">
+<p>使用java web容器监听-监听tomcat服务器的启动，功能简单，操作灵活；</p>
+</li>
+<li class="lvl-3">
+<p>使用springMVC容器监听器-监听spring容器的启动，功能强大，操作简单，推荐。</p>
+</li>
+</ol>
+<h4 id="Spring容器监听">Spring容器监听</h4>
+<p><strong>Spring容器中不同类型的事件</strong>：</p>
+<ol>
+<li class="lvl-3">
+<p>上下文更新事件(ContextRefreshedEvent)：</p>
+<p>在调用ConfigurableApplicationContext 接口中的refresh()方法时被触发。AOP、IOC等都会在这个方法里执行。</p>
+</li>
+<li class="lvl-3">
+<p>上下文开始事件(ContextStartedEvent)：</p>
+<p>当容器调用ConfigurableApplicationContext的Start()方法开始/重新开始容器时触发该事件。</p>
+</li>
+<li class="lvl-3">
+<p>上下文停止事件(ContextStoppedEvent)：</p>
+<p>当容器调用ConfigurableApplicationContext的Stop()方法停止容器时触发该事件。</p>
+</li>
+<li class="lvl-3">
+<p>上下文关闭事件(ContextClosedEvent)：</p>
+<p>当ApplicationContext被关闭时触发该事件。容器被关闭时，其管理的所有单例Bean都被销毁。</p>
+</li>
+<li class="lvl-3">
+<p>请求处理事件(RequestHadledEvent)：</p>
+<p>在Web应用中，当一个http请求（request）结束触发该事件。</p>
+</li>
+</ol>
+<p>如果一个容器是实现了ApplicationListener接口，当一个ApplicationEvent被发布以后，bean会自动被通知。</p>
+<p><strong>自定义事件监听器：</strong></p>
+<p>新建Java类继承 <code>ApplicationListener</code> 类，其泛型即为需要进行监听的事件。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> Lenl</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> v1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@create</span> 2023-04-30 16:08</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span> 继承的类泛型即为需要监听的方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RedisDataInitListener</span> <span class="keyword">implements</span> <span class="title class_">ApplicationListener</span>&lt;ContextRefreshedEvent&gt; &#123;</span><br><span class="line">    <span class="comment">//当Spring容器初始化之后立即执行</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onApplicationEvent</span><span class="params">(ContextRefreshedEvent event)</span> &#123;</span><br><span class="line">		<span class="comment">//执行初始化逻辑</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="数据持久化">数据持久化</h4>
+<ol>
+<li class="lvl-3">
+<p>将什么数据持久化到mysql数据库中？</p>
+</li>
+</ol>
+<p>缓存中还需要参与后续业务操作的数据。</p>
+<ol start="2">
+<li class="lvl-3">
+<p>在哪个模块实现持久化逻辑？</p>
+</li>
+</ol>
+<p>考虑到持久化也属于数据维护范畴，因此推荐初始化在后台后端中。</p>
+<ol start="3">
+<li class="lvl-3">
+<p>在那种组件中实现持久化逻辑？</p>
+</li>
+</ol>
+<p>持久化特点：1.周期执行；2.程序控制执行</p>
+<p>选用轻量级的spring task实现。</p>
+<p>如果需要管理定制化周期，则需要使用quartz等组件。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://github.com/vimianma/vimianma.github.io">Lenl</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://github.com/vimianma/vimianma.github.io/notes/wolf2w/">https://github.com/vimianma/vimianma.github.io/notes/wolf2w/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://github.com/vimianma/vimianma.github.io" target="_blank">LenlBlog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/SpringBoot/">SpringBoot</a><a class="post-meta__tags" href="/tags/MongoDB/">MongoDB</a><a class="post-meta__tags" href="/tags/Redis/">Redis</a></div><div class="post_share"><div class="social-share" data-image="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.png" target="_blank"><img class="post-qr-code-img" src= "/img/hexo_loading.gif" data-lazy-src="/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="/img/alipay.png" target="_blank"><img class="post-qr-code-img" src= "/img/hexo_loading.gif" data-lazy-src="/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/%E4%B8%BB%E9%A2%98%E5%8F%8A%E5%8D%9A%E6%96%87%E7%9B%B8%E5%85%B3_1/" title="hexo-butterfly主题配置摘录_1"><img class="cover" src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/ce1b96feb4e86b8071ed46f0b017a0af.md.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">hexo-butterfly主题配置摘录_1</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/notes/PdfView/" title="基于pdf.js的前后端分离式PDF文件预览实现"><img class="cover" src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-06</div><div class="title">基于pdf.js的前后端分离式PDF文件预览实现</div></div></a></div><div><a href="/notes/Knife4j/" title="SpringBoot2集成Knife4j完成api文档自动生成"><img class="cover" src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-05-03</div><div class="title">SpringBoot2集成Knife4j完成api文档自动生成</div></div></a></div><div><a href="/notes/chunkFile/" title="基于SpringBoot与Vue的大文件分片上传与流式下载"><img class="cover" src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-05-13</div><div class="title">基于SpringBoot与Vue的大文件分片上传与流式下载</div></div></a></div><div><a href="/notes/tips/" title="SpringBoot一些优雅的小技巧记录"><img class="cover" src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-05-03</div><div class="title">SpringBoot一些优雅的小技巧记录</div></div></a></div><div><a href="/notes/wolf2w_2/" title="wolf2w项目经验_站内搜索与接口安全"><img class="cover" src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-05-01</div><div class="title">wolf2w项目经验_站内搜索与接口安全</div></div></a></div><div><a href="/notes/mongoDB/" title="MongoDB入门学习笔记"><img class="cover" src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-05-03</div><div class="title">MongoDB入门学习笔记</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "/img/hexo_loading.gif" data-lazy-src="/img/lenl.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Lenl</div><div class="author-info__description">心有所向，日复一日，必有精进~</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><a id="card-info-btn" href="https://github.com/vimianma"><i class="fab fa-github"></i><span>View me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://gitee.com/lienle" target="_blank" title="Gitee"><i class="fa-brands fa-git" style="color: #c71d23;"></i></a><a class="social-icon" href="https://github.com/vimianma" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:lenl412@163.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">本站意在记录个人生活中的所学所感所想所获；<br/>心有所向，日复一日，必有精进~~~<br>请多多指教~</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">wolf2w项目学习随记_1</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#SQL%E6%8E%92%E5%BA%8F%E5%88%97%E8%BF%90%E7%AE%97%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">SQL排序列运算性能问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%97%B6%E7%BB%9F%E8%AE%A1%E8%A1%A8%E6%93%8D%E4%BD%9C%E6%80%9D%E8%B7%AF%EF%BC%9A%E5%A4%A7%E8%A1%A8%E8%BD%AC%E5%B0%8F%E8%A1%A8"><span class="toc-number">1.1.1.</span> <span class="toc-text">分时统计表操作思路：大表转小表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9A%E6%9C%9F-%E5%AE%9A%E6%97%B6%E7%BB%B4%E6%8A%A4%E5%88%86%E6%97%B6%E7%BB%9F%E8%AE%A1%E8%A1%A8"><span class="toc-number">1.1.2.</span> <span class="toc-text">如何定期&#x2F;定时维护分时统计表</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5-%E6%96%B0%E5%BB%BAJob"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">第一步 新建Job</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5-%E7%BB%99%E5%90%AF%E5%8A%A8%E7%B1%BB%E5%8A%A0%E4%B8%8A-EnableScheduling%E6%B3%A8%E8%A7%A3"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">第二步 给启动类加上@EnableScheduling注解</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E5%AF%B9%E5%A4%A7%E8%A1%A8%E8%BF%9B%E8%A1%8CGroupBy%E7%BB%9F%E8%AE%A1"><span class="toc-number">1.1.3.</span> <span class="toc-text">关于对大表进行GroupBy统计</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E9%9B%86%E6%88%90MongoDB"><span class="toc-number">1.2.</span> <span class="toc-text">项目集成MongoDB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E6%88%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E6%B7%BB%E5%8A%A0"><span class="toc-number">1.2.1.</span> <span class="toc-text">集成与数据添加</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2%E5%88%86%E9%A1%B5"><span class="toc-number">1.2.2.</span> <span class="toc-text">数据查询分页</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E6%9F%A5%E8%AF%A2%E7%9A%84%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.2.3.</span> <span class="toc-text">条件查询的自定义实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%95%E5%85%A5"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">引入</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8B%93%E5%B1%95"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">拓展</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SpringMVC-%E5%8F%82%E6%95%B0%E8%A7%A3%E6%9E%90%E5%99%A8"><span class="toc-number">1.3.</span> <span class="toc-text">SpringMVC 参数解析器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8F%82%E6%95%B0%E8%A7%A3%E6%9E%90%E5%99%A8"><span class="toc-number">1.3.1.</span> <span class="toc-text">自定义参数解析器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E8%A7%A3%E6%9E%90%E5%99%A8%E5%AE%9E%E7%8E%B0%E6%B5%81%E7%A8%8B"><span class="toc-number">1.3.2.</span> <span class="toc-text">参数解析器实现流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E8%A7%A3%E5%8C%BA%E5%88%86%E9%BB%98%E8%AE%A4%E4%B8%8E%E8%87%AA%E5%AE%9A%E4%B9%89%E8%A7%A3%E6%9E%90%E5%99%A8"><span class="toc-number">1.3.3.</span> <span class="toc-text">注解区分默认与自定义解析器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%9F%E8%AE%A1%E7%9B%B8%E5%85%B3"><span class="toc-number">1.4.</span> <span class="toc-text">数据统计相关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%85%E8%AF%BB%E9%87%8F-%E8%AF%84%E8%AE%BA%E6%95%B0%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.4.1.</span> <span class="toc-text">阅读量&#x2F;评论数类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%82%B9%E8%B5%9E%E6%95%B0-%E6%94%B6%E8%97%8F%E6%95%B0%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.4.2.</span> <span class="toc-text">点赞数&#x2F;收藏数类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E6%93%8D%E4%BD%9C%E7%9A%84%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="toc-number">1.4.3.</span> <span class="toc-text">缓存操作的完整流程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.4.3.1.</span> <span class="toc-text">缓存初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Spring%E5%AE%B9%E5%99%A8%E7%9B%91%E5%90%AC"><span class="toc-number">1.4.3.2.</span> <span class="toc-text">Spring容器监听</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96"><span class="toc-number">1.4.3.3.</span> <span class="toc-text">数据持久化</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/notes/GitLabInstall/" title="GitLab安装记录"><img src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GitLab安装记录"/></a><div class="content"><a class="title" href="/notes/GitLabInstall/" title="GitLab安装记录">GitLab安装记录</a><time datetime="2024-05-07T02:13:08.000Z" title="发表于 2024-05-07 10:13:08">2024-05-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/notes/hwodNotes/" title="华为机试刷题相关笔记"><img src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="华为机试刷题相关笔记"/></a><div class="content"><a class="title" href="/notes/hwodNotes/" title="华为机试刷题相关笔记">华为机试刷题相关笔记</a><time datetime="2024-04-28T02:22:25.000Z" title="发表于 2024-04-28 10:22:25">2024-04-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/notes/dockerNotes/" title="Docker备忘笔记"><img src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker备忘笔记"/></a><div class="content"><a class="title" href="/notes/dockerNotes/" title="Docker备忘笔记">Docker备忘笔记</a><time datetime="2024-04-06T13:17:09.000Z" title="发表于 2024-04-06 21:17:09">2024-04-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/notes/mysqlInstall/" title="mysql压缩包方式本地安装"><img src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="mysql压缩包方式本地安装"/></a><div class="content"><a class="title" href="/notes/mysqlInstall/" title="mysql压缩包方式本地安装">mysql压缩包方式本地安装</a><time datetime="2024-01-03T05:33:33.000Z" title="发表于 2024-01-03 13:33:33">2024-01-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/notes/PdfView/" title="基于pdf.js的前后端分离式PDF文件预览实现"><img src= "/img/hexo_loading.gif" data-lazy-src="https://z4a.net/images/2023/04/22/fcc1d07f3136fe8e818242a6534391c8.md.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="基于pdf.js的前后端分离式PDF文件预览实现"/></a><div class="content"><a class="title" href="/notes/PdfView/" title="基于pdf.js的前后端分离式PDF文件预览实现">基于pdf.js的前后端分离式PDF文件预览实现</a><time datetime="2023-08-06T02:18:26.000Z" title="发表于 2023-08-06 10:18:26">2023-08-06</time></div></div></div></div></div></div></main><footer id="footer" style="background: -#484847"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2024 By Lenl</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Hi, welcome to my blog !</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'dBlOeCLNhBxbSdZO44fRKdBa-gzGzoHsz',
+      appKey: 'DCSQoDhPl0UOF7Ix9Imdfd9X',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div></body></html>
